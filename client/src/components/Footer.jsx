@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Code,
   Mail,
@@ -83,39 +84,39 @@ export const Footer = ({ profile }) => {
             </p>
             <ul className="space-y-2 text-xs">
               <li>
-                <a href="#about" className="hover:text-[#a5c9af] transition-colors">
+                <Link to="/about" className="hover:text-[#a5c9af] transition-colors">
                   About Me
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#skills" className="hover:text-[#a5c9af] transition-colors">
-                  Skills & Expertise
-                </a>
+                <Link to="/skills" className="hover:text-[#a5c9af] transition-colors">
+                  Skills &amp; Expertise
+                </Link>
               </li>
               <li>
-                <a href="#projects" className="hover:text-[#a5c9af] transition-colors">
+                <Link to="/projects" className="hover:text-[#a5c9af] transition-colors">
                   Featured Projects
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#experience" className="hover:text-[#a5c9af] transition-colors">
-                  Education & Experience
-                </a>
+                <Link to="/experience" className="hover:text-[#a5c9af] transition-colors">
+                  Education &amp; Experience
+                </Link>
               </li>
               <li>
-                <a href="#certifications" className="hover:text-[#a5c9af] transition-colors">
-                  Certifications & Honors
-                </a>
+                <Link to="/experience" className="hover:text-[#a5c9af] transition-colors">
+                  Certifications &amp; Honors
+                </Link>
               </li>
               <li>
-                <a href="#resume" className="hover:text-[#a5c9af] transition-colors">
+                <Link to="/experience" className="hover:text-[#a5c9af] transition-colors">
                   Resume Downloads
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#contact" className="hover:text-[#a5c9af] transition-colors">
+                <Link to="/contact" className="hover:text-[#a5c9af] transition-colors">
                   Contact Form
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

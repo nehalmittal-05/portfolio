@@ -1,119 +1,61 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, Menu, X, Code2, Send } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const NAV_LINKS = [
-  { name: 'Home', href: '#home' },
-  { name: 'About', href: '#about' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Projects', href: '#projects' },
-  { name: 'Experience', href: '#experience' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'Home', to: '/' },
+  { name: 'About', to: '/about' },
+  { name: 'Skills', to: '/skills' },
+  { name: 'Projects', to: '/projects' },
+  { name: 'Experience', to: '/experience' },
+  { name: 'Contact', to: '/contact' },
 ];
 
 export const Navbar = ({ profileName = 'Nehal Mittal' }) => {
   const { isDark, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Precision active section detection using viewport metrics
-  const handleScroll = useCallback(() => {
-    const scrollY = window.scrollY;
-    setIsScrolled(scrollY > 20);
+  // Determine active link: exact match for '/', startsWith for others
+  const isActive = (to) => {
+    if (to === '/') return location.pathname === '/';
+    return location.pathname.startsWith(to);
+  };
 
-    const windowHeight = window.innerHeight;
-    const docHeight = document.documentElement.scrollHeight;
-
-    // Near the top of the page
-    if (scrollY < 120) {
-      setActiveSection('home');
-      return;
-    }
-
-    // Near the bottom of the page -> focus Contact
-    if (windowHeight + scrollY >= docHeight - 120) {
-      setActiveSection('contact');
-      return;
-    }
-
-    // Sections in order from bottom to top for top-to-bottom detection
-    const sectionsToCheck = [
-      { id: 'contact', key: 'contact' },
-      { id: 'resume', key: 'experience' },
-      { id: 'certifications', key: 'experience' },
-      { id: 'experience', key: 'experience' },
-      { id: 'projects', key: 'projects' },
-      { id: 'skills', key: 'skills' },
-      { id: 'about', key: 'about' },
-      { id: 'home', key: 'home' },
-    ];
-
-    for (const { id, key } of sectionsToCheck) {
-      const el = document.getElementById(id);
-      if (el) {
-        const rect = el.getBoundingClientRect();
-        // If the section occupies the upper-mid viewport
-        if (rect.top <= 220 && rect.bottom >= 140) {
-          setActiveSection(key);
-          return;
-        }
-      }
-    }
-  }, []);
-
+  // Scroll shadow effect
   useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.pathname]);
 
   // Handle escape key and body scroll lock for mobile menu
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && mobileMenuOpen) {
-        setMobileMenuOpen(false);
-      }
+      if (e.key === 'Escape' && mobileMenuOpen) setMobileMenuOpen(false);
     };
-
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleKeyDown);
     } else {
       document.body.style.overflow = 'unset';
     }
-
     return () => {
       document.body.style.overflow = 'unset';
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [mobileMenuOpen]);
-
-  // Smooth scroll handler with offset safety
-  const handleNavClick = (e, href) => {
-    if (e) e.preventDefault();
-    setMobileMenuOpen(false);
-
-    if (href === '#home' || href === '#hero') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (window.history.pushState) {
-        window.history.pushState(null, '', '#home');
-      }
-      setActiveSection('home');
-      return;
-    }
-
-    const targetId = href.replace(/^#/, '');
-    const element = document.getElementById(targetId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      if (window.history.pushState) {
-        window.history.pushState(null, '', href);
-      }
-      setActiveSection(targetId);
-    }
-  };
 
   return (
     <header
@@ -130,11 +72,10 @@ export const Navbar = ({ profileName = 'Nehal Mittal' }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Left Side: Logo / Brand Name */}
-          <a
-            href="#home"
+          <Link
+            to="/"
             className="flex items-center gap-3 group text-decoration-none focus-ring rounded-xl p-1 -ml-1 transition-opacity hover:opacity-90"
-            onClick={(e) => handleNavClick(e, '#home')}
-            aria-label={`${profileName} - Return to top`}
+            aria-label={`${profileName} - Return to home`}
           >
             <div
               className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105 ${
@@ -157,22 +98,20 @@ export const Navbar = ({ profileName = 'Nehal Mittal' }) => {
                 Software Developer &bull; ML
               </span>
             </div>
-          </a>
+          </Link>
 
           {/* Right Side: Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-1 lg:gap-2">
             <nav className="flex items-center gap-1" aria-label="Main Navigation">
               {NAV_LINKS.map((link) => {
-                const sectionKey = link.href.substring(1);
-                const isActive = activeSection === sectionKey;
+                const active = isActive(link.to);
                 return (
-                  <a
+                  <Link
                     key={link.name}
-                    href={link.href}
-                    onClick={(e) => handleNavClick(e, link.href)}
-                    aria-current={isActive ? 'page' : undefined}
+                    to={link.to}
+                    aria-current={active ? 'page' : undefined}
                     className={`relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 focus-ring cursor-pointer select-none ${
-                      isActive
+                      active
                         ? isDark
                           ? 'text-[#a5c9af] bg-[#a5c9af]/12 font-semibold border border-[#a5c9af]/30 shadow-xs'
                           : 'text-[#3e6149] bg-[#3e6149]/10 font-semibold border border-[#3e6149]/20 shadow-xs'
@@ -182,7 +121,7 @@ export const Navbar = ({ profileName = 'Nehal Mittal' }) => {
                     }`}
                   >
                     {link.name}
-                    {isActive && (
+                    {active && (
                       <motion.div
                         layoutId="activeNavIndicator"
                         className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full ${
@@ -191,7 +130,7 @@ export const Navbar = ({ profileName = 'Nehal Mittal' }) => {
                         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                       />
                     )}
-                  </a>
+                  </Link>
                 );
               })}
             </nav>
@@ -214,9 +153,8 @@ export const Navbar = ({ profileName = 'Nehal Mittal' }) => {
             </button>
 
             {/* Quick Contact CTA */}
-            <a
-              href="#contact"
-              onClick={(e) => handleNavClick(e, '#contact')}
+            <Link
+              to="/contact"
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer focus-ring btn-tactile ml-1 ${
                 isDark
                   ? 'bg-[#a5c9af] text-[#111411] hover:bg-[#b8d6bf] shadow-sm shadow-[#a5c9af]/15'
@@ -225,7 +163,7 @@ export const Navbar = ({ profileName = 'Nehal Mittal' }) => {
             >
               <span>Get in Touch</span>
               <Send className="w-3.5 h-3.5" />
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Right Controls: Theme Toggle & Hamburger */}
@@ -287,15 +225,14 @@ export const Navbar = ({ profileName = 'Nehal Mittal' }) => {
             >
               <div className="flex flex-col gap-1.5 max-w-md mx-auto">
                 {NAV_LINKS.map((link) => {
-                  const sectionKey = link.href.substring(1);
-                  const isActive = activeSection === sectionKey;
+                  const active = isActive(link.to);
                   return (
-                    <a
+                    <Link
                       key={link.name}
-                      href={link.href}
-                      onClick={(e) => handleNavClick(e, link.href)}
+                      to={link.to}
+                      onClick={() => setMobileMenuOpen(false)}
                       className={`text-left px-4 py-3 rounded-xl text-base font-medium transition-colors focus-ring cursor-pointer flex items-center justify-between ${
-                        isActive
+                        active
                           ? isDark
                             ? 'bg-[#a5c9af]/12 text-[#a5c9af] font-semibold border border-[#a5c9af]/30'
                             : 'bg-[#3e6149]/10 text-[#3e6149] font-semibold border border-[#3e6149]/20'
@@ -305,17 +242,17 @@ export const Navbar = ({ profileName = 'Nehal Mittal' }) => {
                       }`}
                     >
                       <span>{link.name}</span>
-                      {isActive && (
+                      {active && (
                         <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#a5c9af]' : 'bg-[#3e6149]'}`} />
                       )}
-                    </a>
+                    </Link>
                   );
                 })}
 
                 <div className={`pt-3 mt-2 border-t ${isDark ? 'border-[#242c24]' : 'border-[#e2e6df]'}`}>
-                  <a
-                    href="#contact"
-                    onClick={(e) => handleNavClick(e, '#contact')}
+                  <Link
+                    to="/contact"
+                    onClick={() => setMobileMenuOpen(false)}
                     className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold btn-tactile cursor-pointer focus-ring ${
                       isDark
                         ? 'bg-[#a5c9af] text-[#111411] hover:bg-[#b8d6bf]'
@@ -324,7 +261,7 @@ export const Navbar = ({ profileName = 'Nehal Mittal' }) => {
                   >
                     <Send className="w-4 h-4" />
                     <span>Contact Me Directly</span>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </motion.div>
