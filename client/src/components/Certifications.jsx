@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
-export const Certifications = ({ certificates = [] }) => {
+export const Certifications = ({ certificates = [], loading = false }) => {
   const { isDark } = useTheme();
   const [filter, setFilter] = useState('all');
 
@@ -163,6 +163,14 @@ export const Certifications = ({ certificates = [] }) => {
             );
           })}
         </motion.div>
+
+        {filteredCerts.length === 0 && (
+          <div className="text-center py-16">
+            <p className={`text-sm ${isDark ? 'text-[#8a9687]' : 'text-[#62705e]'}`}>
+              {loading ? 'Loading credentials from database...' : 'No credentials available from database.'}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

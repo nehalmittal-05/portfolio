@@ -20,7 +20,7 @@ const CATEGORIES = [
   'Tools & Technologies',
 ];
 
-export const Skills = ({ skillsData }) => {
+export const Skills = ({ skillsData, loading = false }) => {
   const { isDark } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -188,6 +188,14 @@ export const Skills = ({ skillsData }) => {
             );
           })}
         </motion.div>
+
+        {filteredSkills.length === 0 && (
+          <div className="text-center py-16">
+            <p className={`text-sm ${isDark ? 'text-[#8a9687]' : 'text-[#62705e]'}`}>
+              {loading ? 'Loading technical skills from database...' : 'No skills available from database.'}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

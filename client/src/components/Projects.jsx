@@ -15,7 +15,7 @@ import ProjectModal from './ProjectModal';
 import ProjectBanner from './ProjectBanner';
 import TiltCard from './TiltCard';
 
-export const Projects = ({ projects = [] }) => {
+export const Projects = ({ projects = [], loading = false }) => {
   const { isDark } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -246,7 +246,13 @@ export const Projects = ({ projects = [] }) => {
 
         {filteredProjects.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-slate-400">No projects found matching your criteria.</p>
+            <p className={`text-sm ${isDark ? 'text-[#8a9687]' : 'text-[#62705e]'}`}>
+              {loading
+                ? 'Loading projects from database...'
+                : searchQuery || selectedCategory !== 'All'
+                ? 'No projects found matching your criteria.'
+                : 'No projects available from database.'}
+            </p>
           </div>
         )}
       </div>

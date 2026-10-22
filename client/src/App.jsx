@@ -4,23 +4,18 @@ import { ThemeProvider } from './context/ThemeContext';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import { fetchPortfolioData } from './services/api';
-import {
-  initialProfile,
-  initialProjects,
-  initialSkills,
-  initialTimeline,
-  initialCertificates,
-} from './data/portfolio';
+import { personalInfo } from './data/portfolio';
 
 export function App() {
   const [portfolioData, setPortfolioData] = useState({
-    profile: initialProfile,
-    projects: initialProjects,
-    skills: initialSkills,
-    timeline: initialTimeline,
-    certificates: initialCertificates,
+    profile: personalInfo,
+    projects: [],
+    skills: {},
+    timeline: [],
+    certificates: [],
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -28,17 +23,30 @@ export function App() {
     fetchPortfolioData()
       .then((data) => {
         if (isMounted && data) {
-          setPortfolioData((prev) => ({
-            profile: data.profile || prev.profile,
-            projects: data.projects || prev.projects,
-            skills: data.skills || prev.skills,
-            timeline: data.timeline || prev.timeline,
-            certificates: data.certificates || prev.certificates,
-          }));
+          setPortfolioData({
+            profile: data.profile || personalInfo,
+            projects: Array.isArray(data.projects) ? data.projects : [],
+            skills: data.skills || {},
+            timeline: Array.isArray(data.timeline) ? data.timeline : [],
+            certificates: Array.isArray(data.certificates) ? data.certificates : [],
+            dbStatus: data.dbStatus || null,
+          });
+          setError(null);
         }
       })
       .catch((err) => {
-        console.warn('Portfolio data fetch note:', err.message);
+        if (isMounted) {
+          console.warn('Portfolio data fetch note:', err.message);
+          setError(err.message || 'Unable to connect to database or backend server.');
+          setPortfolioData((prev) => ({
+            profile: prev.profile,
+            projects: [],
+            skills: {},
+            timeline: [],
+            certificates: [],
+            dbStatus: { connected: false },
+          }));
+        }
       })
       .finally(() => {
         if (isMounted) setLoading(false);
@@ -53,7 +61,10 @@ export function App() {
     <ThemeProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home data={portfolioData} loading={loading} />} />
+          <Route
+            path="/"
+            element={<Home data={portfolioData} loading={loading} error={error} />}
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

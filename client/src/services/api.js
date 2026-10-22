@@ -1,11 +1,3 @@
-import {
-  initialProfile,
-  initialProjects,
-  initialSkills,
-  initialTimeline,
-  initialCertificates,
-} from '../data/portfolio';
-
 /**
  * Configure API Base URL from VITE_API_URL environment variable.
  * Fallbacks to '/api' for Vite dev proxy or relative pathing in production.
@@ -20,49 +12,33 @@ export const API_BASE = (() => {
 })();
 
 /**
- * Fetch complete portfolio metadata (projects, skills, timeline, certificates)
+ * Fetch complete portfolio metadata from backend / MongoDB
  */
 export const fetchPortfolioData = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/portfolio-data`);
-    if (!res.ok) {
-      throw new Error(`Server returned HTTP ${res.status}`);
-    }
-    const json = await res.json();
-    if (json.success && json.data) {
-      return json.data;
-    }
-    throw new Error('Invalid response format from portfolio-data endpoint');
-  } catch (error) {
-    console.warn('Backend API notice: Using client data fallback.', error.message);
-    return {
-      profile: initialProfile,
-      projects: initialProjects,
-      skills: initialSkills,
-      timeline: initialTimeline,
-      certificates: initialCertificates,
-      dbStatus: { connected: false, mode: 'Local Client Fallback' },
-    };
+  const res = await fetch(`${API_BASE}/portfolio-data`);
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(errorBody.message || `Server returned HTTP ${res.status}`);
   }
+  const json = await res.json();
+  if (json.success && json.data) {
+    return json.data;
+  }
+  throw new Error(json.message || 'Invalid response format from portfolio-data endpoint');
 };
 
 /**
- * Fetch projects by category
+ * Fetch projects by category from backend / MongoDB
  */
 export const fetchProjects = async (category = 'All') => {
-  try {
-    const query = category && category !== 'All' ? `?category=${encodeURIComponent(category)}` : '';
-    const res = await fetch(`${API_BASE}/projects${query}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-    return json.data || initialProjects;
-  } catch (error) {
-    console.warn('Projects API notice:', error.message);
-    if (category && category !== 'All') {
-      return initialProjects.filter((p) => p.category === category);
-    }
-    return initialProjects;
+  const query = category && category !== 'All' ? `?category=${encodeURIComponent(category)}` : '';
+  const res = await fetch(`${API_BASE}/projects${query}`);
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(errorBody.message || `HTTP ${res.status}`);
   }
+  const json = await res.json();
+  return json.data || [];
 };
 
 /**

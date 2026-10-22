@@ -12,7 +12,7 @@ import Footer from '../components/Footer';
 import Spotlight from '../components/Spotlight';
 import CustomCursor from '../components/CustomCursor';
 
-export const Home = ({ data, loading }) => {
+export const Home = ({ data, loading, error }) => {
   const { profile, projects, skills, timeline, certificates } = data;
 
   return (
@@ -28,6 +28,23 @@ export const Home = ({ data, loading }) => {
 
       {/* Main Content Sections */}
       <main className="flex-1 relative z-10">
+        {/* Database / Backend Connection Notice (shown only when backend/MongoDB is unavailable) */}
+        {error && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-2">
+            <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-200 text-xs sm:text-sm flex items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                <span>
+                  <strong>Database Notice:</strong> {error}
+                </span>
+              </div>
+              <span className="hidden sm:inline-block text-[11px] font-mono text-amber-300/80 uppercase tracking-wider bg-amber-500/20 px-2 py-0.5 rounded">
+                Live Data Only
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* 2. Hero Section */}
         <Hero profile={profile} />
 
@@ -35,16 +52,16 @@ export const Home = ({ data, loading }) => {
         <About profile={profile} />
 
         {/* 4. Skills Section */}
-        <Skills skillsData={skills} />
+        <Skills skillsData={skills} loading={loading} />
 
         {/* 5. Projects Section */}
-        <Projects projects={projects} />
+        <Projects projects={projects} loading={loading} />
 
         {/* 6. Education and Experience Timeline */}
-        <ExperienceTimeline timelineItems={timeline} />
+        <ExperienceTimeline timelineItems={timeline} loading={loading} />
 
         {/* 7. Certifications & Achievements Section */}
-        <Certifications certificates={certificates} />
+        <Certifications certificates={certificates} loading={loading} />
 
         {/* 8. Resume Section */}
         <ResumeSection profile={profile} />

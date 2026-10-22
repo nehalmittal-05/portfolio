@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
-export const ExperienceTimeline = ({ timelineItems = [] }) => {
+export const ExperienceTimeline = ({ timelineItems = [], loading = false }) => {
   const { isDark } = useTheme();
   const [filterType, setFilterType] = useState('all');
 
@@ -179,6 +179,14 @@ export const ExperienceTimeline = ({ timelineItems = [] }) => {
             );
           })}
         </div>
+
+        {filteredItems.length === 0 && (
+          <div className="text-center py-16">
+            <p className={`text-sm ${isDark ? 'text-[#8a9687]' : 'text-[#62705e]'}`}>
+              {loading ? 'Loading milestones from database...' : 'No milestones available from database.'}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

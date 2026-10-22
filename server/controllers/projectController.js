@@ -1,43 +1,31 @@
 import Project from '../models/Project.js';
 import { getDbStatus } from '../config/db.js';
-import { seedProjects } from '../seed/seedData.js';
 
 export const getProjects = async (req, res) => {
   try {
     const { category, search } = req.query;
     const db = getDbStatus();
 
-    let projects = [];
-
-    if (db.connected) {
-      let query = {};
-      if (category && category !== 'All') {
-        query.category = category;
-      }
-      if (search) {
-        query.$or = [
-          { title: { $regex: search, $options: 'i' } },
-          { description: { $regex: search, $options: 'i' } },
-          { tags: { $in: [new RegExp(search, 'i')] } },
-        ];
-      }
-      projects = await Project.find(query).sort({ order: 1, createdAt: -1 });
-    } else {
-      // Fallback
-      projects = [...seedProjects];
-      if (category && category !== 'All') {
-        projects = projects.filter((p) => p.category === category);
-      }
-      if (search) {
-        const s = search.toLowerCase();
-        projects = projects.filter(
-          (p) =>
-            p.title.toLowerCase().includes(s) ||
-            p.description.toLowerCase().includes(s) ||
-            p.tags.some((t) => t.toLowerCase().includes(s))
-        );
-      }
+    if (!db.connected) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection is not available. Projects cannot be retrieved.',
+        data: [],
+      });
     }
+
+    let query = {};
+    if (category && category !== 'All') {
+      query.category = category;
+    }
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } },
+      ];
+    }
+    const projects = await Project.find(query).sort({ order: 1, createdAt: -1 });
 
     return res.json({
       success: true,
@@ -55,12 +43,14 @@ export const getProjectBySlug = async (req, res) => {
     const { slug } = req.params;
     const db = getDbStatus();
 
-    let project = null;
-    if (db.connected) {
-      project = await Project.findOne({ slug });
-    } else {
-      project = seedProjects.find((p) => p.slug === slug);
+    if (!db.connected) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection is not available.',
+      });
     }
+
+    const project = await Project.findOne({ slug });
 
     if (!project) {
       return res.status(404).json({ success: false, message: 'Project not found' });
