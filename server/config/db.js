@@ -57,15 +57,8 @@ export const connectDB = async () => {
     return connectionPromise;
   }
 
-  const uri = process.env.MONGODB_URI ? process.env.MONGODB_URI.trim() : '';
-
-  if (!uri) {
-    console.warn('\n⚠️  Notice: MONGODB_URI environment variable is not defined.');
-    console.warn('💡 The server is running with standby memory storage for contact messages.');
-    isConnected = false;
-    lastConnectionError = 'MONGODB_URI environment variable is not defined.';
-    return null;
-  }
+  const HARDCODED_URI = 'mongodb+srv://nehalmittal15_db_user:PJUx7OMSMEa9GrmX@portfoliocluster.xz5xjol.mongodb.net/mern_portfolio?retryWrites=true&w=majority';
+  const uri = (process.env.MONGODB_URI && process.env.MONGODB_URI.trim()) || HARDCODED_URI;
 
   connectionPromise = (async () => {
     try {
@@ -78,7 +71,7 @@ export const connectDB = async () => {
       console.log(`\n✨ MongoDB Connected Successfully: ${conn.connection.host}/${conn.connection.name}`);
 
       // Auto-seed collections if empty in background
-      autoSeedIfEmpty().catch(() => {});
+      autoSeedIfEmpty().catch(() => { });
       return conn;
     } catch (error) {
       isConnected = false;
@@ -120,7 +113,7 @@ export const getDbStatus = () => ({
   host: mongoose.connection.host || null,
   name: mongoose.connection.name || null,
   mode: isConnected && mongoose.connection.readyState === 1 ? 'MongoDB Live' : 'Standby Memory Queue',
-  hasUri: Boolean(process.env.MONGODB_URI && process.env.MONGODB_URI.trim()),
+  hasUri: true,
   lastError: lastConnectionError,
 });
 

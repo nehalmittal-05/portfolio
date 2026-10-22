@@ -25,7 +25,7 @@ export const submitContact = async (req, res, next) => {
     };
 
     // Ensure database connection is active before processing
-    if (mongoose.connection.readyState !== 1 && process.env.MONGODB_URI) {
+    if (mongoose.connection.readyState !== 1) {
       await connectDB();
     }
 
@@ -79,7 +79,7 @@ export const submitContact = async (req, res, next) => {
  */
 export const getContacts = async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1 && process.env.MONGODB_URI) {
+    if (mongoose.connection.readyState !== 1) {
       await connectDB();
     }
 

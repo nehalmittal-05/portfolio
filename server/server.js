@@ -74,7 +74,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Ensure database connection is ready for incoming requests (vital for serverless cold starts)
 app.use('/api', async (req, res, next) => {
-  if (process.env.MONGODB_URI && mongoose.connection.readyState !== 1) {
+  if (mongoose.connection.readyState !== 1) {
     try {
       await connectDB();
     } catch (err) {
