@@ -1,0 +1,50 @@
+RESUME - NEHAL MITTAL
+==================================================
+Candidate: Nehal Mittal
+Degree: B.Tech in Computer Science and Engineering
+Institution: JK Lakshmipat University
+Current Status: Student (Preparing for Software Engineering Placements)
+Location: Jaipur, Rajasthan, India
+Email: nehalmittal5251218@gmail.com
+GitHub: https://github.com/nehalmittal-05
+LinkedIn: https://www.linkedin.com/in/nehal511
+
+PROFESSIONAL SUMMARY
+--------------------
+Computer Science and Engineering undergraduate at JK Lakshmipat University, Jaipur.
+Passionate about software development, machine learning, and artificial intelligence,
+with practical experience designing relational database systems in MySQL, developing
+machine learning classification models, and exploring deep learning for medical image analysis.
+
+EDUCATION
+---------
+Bachelor of Technology (B.Tech) in Computer Science and Engineering
+JK Lakshmipat University, Jaipur, Rajasthan, India | [2022 - 2026 Placeholder]
+- Coursework: Data Structures & Algorithms, Object-Oriented Programming,
+  Database Management Systems, Operating Systems, Computer Networks, Machine Learning
+
+TECHNICAL SKILLS
+----------------
+- Programming Languages: Python, C / C++, JavaScript, SQL
+- Databases: MySQL, MongoDB, Relational Schema Design, SQL Query Optimization
+- Machine Learning & AI: Scikit-Learn, Pandas, NumPy, Data Preprocessing, CNN Concepts
+- Web & Backend: Node.js, Express.js, RESTful APIs, HTML5, CSS3, React.js (Core Concepts)
+- Tools & Environment: Git & GitHub, VS Code, Jupyter Notebook, Postman, Linux CLI
+
+FEATURED PROJECTS
+-----------------
+1. Asteroid Risk Assessment
+   - Machine learning classification model for predicting potentially hazardous near-Earth asteroids.
+   - Performed data preprocessing, exploratory data analysis, and supervised model evaluation.
+   - Technologies: Python, Scikit-Learn, Pandas, NumPy.
+
+2. Power Management System
+   - Database engineering project tracking and managing campus electricity consumption.
+   - Created normalized relational schemas, analytical views, and peak usage aggregation queries.
+   - Technologies: MySQL, Database Design, SQL Queries, Relational Modeling.
+
+3. Lung Nodule Detection
+   - Deep learning research initiative focused on medical image analysis using CT scans.
+   - Preprocessed volumetric slice data and investigated convolutional neural network architectures.
+   - Technologies: Python, Deep Learning, Computer Vision, CNNs, Medical Imaging.
+==================================================
