@@ -72,18 +72,6 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// Ensure database connection is ready for incoming requests (vital for serverless cold starts)
-app.use('/api', async (req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
-    try {
-      await connectDB();
-    } catch (err) {
-      console.warn('MongoDB connection middleware notice:', err.message);
-    }
-  }
-  next();
-});
-
 // Global API rate limiting
 app.use('/api', apiRateLimiter);
 
@@ -106,8 +94,6 @@ app.get('/api/health', (req, res) => {
       host: db.host,
       name: db.name,
       mode: db.mode,
-      hasUri: db.hasUri,
-      lastError: db.lastError,
     },
   });
 });

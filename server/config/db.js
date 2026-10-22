@@ -16,8 +16,6 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 dotenv.config();
 
 let isConnected = false;
-let connectionPromise = null;
-let lastConnectionError = null;
 
 /**
  * Auto-seed initial portfolio collections if empty upon successful MongoDB connection
@@ -42,54 +40,49 @@ export const autoSeedIfEmpty = async () => {
 
 /**
  * Connect to MongoDB using the MONGODB_URI environment variable
- * Designed for serverless environments with cached connection promise
  */
 export const connectDB = async () => {
   // Reuse existing connection in serverless warm invocations
-  if (mongoose.connection.readyState === 1) {
+  if (mongoose.connection.readyState >= 1) {
     isConnected = true;
-    lastConnectionError = null;
-    return mongoose.connection;
+    return;
   }
 
-  // Reuse existing connection attempt in progress
-  if (connectionPromise) {
-    return connectionPromise;
+  const uri = process.env.MONGODB_URI;
+
+  if (!uri) {
+    console.warn('\n⚠️  Notice: MONGODB_URI environment variable is not defined in server/.env.');
+    console.warn('💡 The server is running with standby memory storage for contact messages.');
+    console.warn('   To connect to a live MongoDB database:');
+    console.warn('   1. Create a free cluster on MongoDB Atlas (https://www.mongodb.com/atlas)');
+    console.warn('   2. Add MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/mern_portfolio to server/.env\n');
+    isConnected = false;
+    return;
   }
 
-  const HARDCODED_URI = 'mongodb+srv://nehalmittal15_db_user:PJUx7OMSMEa9GrmX@portfoliocluster.xz5xjol.mongodb.net/mern_portfolio?retryWrites=true&w=majority';
-  const uri = (process.env.MONGODB_URI && process.env.MONGODB_URI.trim()) || HARDCODED_URI;
+  try {
+    const conn = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 8000, // 8-second timeout for cloud Atlas connections
+    });
 
-  connectionPromise = (async () => {
-    try {
-      const conn = await mongoose.connect(uri, {
-        serverSelectionTimeoutMS: 5000, // 5-second timeout for cloud Atlas connections
-      });
+    isConnected = true;
+    console.log(`\n✨ MongoDB Connected Successfully: ${conn.connection.host}/${conn.connection.name}`);
 
-      isConnected = true;
-      lastConnectionError = null;
-      console.log(`\n✨ MongoDB Connected Successfully: ${conn.connection.host}/${conn.connection.name}`);
-
-      // Auto-seed collections if empty in background
-      autoSeedIfEmpty().catch(() => { });
-      return conn;
-    } catch (error) {
-      isConnected = false;
-      lastConnectionError = error.message;
-      console.warn(`\n⚠️  Notice: MongoDB connection failed: ${error.message}`);
-      return null;
-    } finally {
-      connectionPromise = null;
-    }
-  })();
-
-  return connectionPromise;
+    // Auto-seed collections if empty
+    await autoSeedIfEmpty();
+  } catch (error) {
+    isConnected = false;
+    console.warn(`\n⚠️  Notice: MongoDB connection failed: ${error.message}`);
+    console.warn('💡 The Express server will continue running smoothly.');
+    console.warn('   - GET endpoints will serve structured portfolio data.');
+    console.warn('   - POST /api/contact will safely queue messages in server memory.');
+    console.warn('   - Check server/.env to ensure your MONGODB_URI is correct and reachable.\n');
+  }
 };
 
 // Listen to Mongoose connection lifecycle events
 mongoose.connection.on('connected', () => {
   isConnected = true;
-  lastConnectionError = null;
   console.log('🟢 Mongoose connection state: CONNECTED');
 });
 
@@ -100,7 +93,6 @@ mongoose.connection.on('disconnected', () => {
 
 mongoose.connection.on('error', (err) => {
   isConnected = false;
-  lastConnectionError = err.message;
   console.error('❌ Mongoose connection error:', err.message);
 });
 
@@ -113,8 +105,6 @@ export const getDbStatus = () => ({
   host: mongoose.connection.host || null,
   name: mongoose.connection.name || null,
   mode: isConnected && mongoose.connection.readyState === 1 ? 'MongoDB Live' : 'Standby Memory Queue',
-  hasUri: true,
-  lastError: lastConnectionError,
 });
 
 export default connectDB;

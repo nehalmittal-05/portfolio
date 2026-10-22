@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Contact from '../models/Contact.js';
-import connectDB, { getDbStatus } from '../config/db.js';
+import { getDbStatus } from '../config/db.js';
 
 // Standby memory store used only when MongoDB connection is offline
 const inMemoryContacts = [];
@@ -23,11 +23,6 @@ export const submitContact = async (req, res, next) => {
       ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '',
       createdAt: new Date(),
     };
-
-    // Ensure database connection is active before processing
-    if (mongoose.connection.readyState !== 1) {
-      await connectDB();
-    }
 
     const isConnected = mongoose.connection.readyState === 1;
 
@@ -79,10 +74,6 @@ export const submitContact = async (req, res, next) => {
  */
 export const getContacts = async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      await connectDB();
-    }
-
     const isConnected = mongoose.connection.readyState === 1;
 
     if (isConnected) {
